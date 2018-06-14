@@ -50,7 +50,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyFloat(double value)
         {
-            obj = Runtime.PyFloat_FromDouble(value);
+            obj = Runtime.Interop.PyFloat_FromDouble(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -65,7 +65,7 @@ namespace Python.Runtime
         {
             using (var s = new PyString(value))
             {
-                obj = Runtime.PyFloat_FromString(s.obj, IntPtr.Zero);
+                obj = Runtime.Interop.PyFloat_FromString(s.obj, IntPtr.Zero);
                 Runtime.CheckExceptionOccurred();
             }
         }
@@ -93,7 +93,7 @@ namespace Python.Runtime
         /// </remarks>
         public static PyFloat AsFloat(PyObject value)
         {
-            IntPtr op = Runtime.PyNumber_Float(value.obj);
+            IntPtr op = Runtime.Interop.PyNumber_Float(value.obj);
             Runtime.CheckExceptionOccurred();
             return new PyFloat(op);
         }

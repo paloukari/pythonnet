@@ -155,15 +155,15 @@ namespace Python.Runtime
             var pyderived = value as IPythonDerivedType;
             if (null != pyderived)
             {
-                #if NETSTANDARD
+#if NETSTANDARD || NETCOREAPP
                 return ClassDerivedObject.ToPython(pyderived);
-                #else
+#else
                 // if object is remote don't do this
                 if (!System.Runtime.Remoting.RemotingServices.IsTransparentProxy(pyderived))
                 {
                     return ClassDerivedObject.ToPython(pyderived);
                 }
-                #endif
+#endif
             }
 
             // hmm - from Python, we almost never care what the declared
@@ -198,24 +198,24 @@ namespace Python.Runtime
                     return Runtime.PyInt_FromInt32((int)((byte)value));
 
                 case TypeCode.Char:
-                    return Runtime.PyUnicode_FromOrdinal((int)((char)value));
+                    return Runtime.Interop.PyUnicode_FromOrdinal((int)((char)value));
 
                 case TypeCode.Int16:
                     return Runtime.PyInt_FromInt32((int)((short)value));
 
                 case TypeCode.Int64:
-                    return Runtime.PyLong_FromLongLong((long)value);
+                    return Runtime.Interop.PyLong_FromLongLong((long)value);
 
                 case TypeCode.Single:
                     // return Runtime.PyFloat_FromDouble((double)((float)value));
                     string ss = ((float)value).ToString(nfi);
                     IntPtr ps = Runtime.PyString_FromString(ss);
-                    IntPtr op = Runtime.PyFloat_FromString(ps, IntPtr.Zero);
+                    IntPtr op = Runtime.Interop.PyFloat_FromString(ps, IntPtr.Zero);
                     Runtime.XDecref(ps);
                     return op;
 
                 case TypeCode.Double:
-                    return Runtime.PyFloat_FromDouble((double)value);
+                    return Runtime.Interop.PyFloat_FromDouble((double)value);
 
                 case TypeCode.SByte:
                     return Runtime.PyInt_FromInt32((int)((sbyte)value));
@@ -224,10 +224,10 @@ namespace Python.Runtime
                     return Runtime.PyInt_FromInt32((int)((ushort)value));
 
                 case TypeCode.UInt32:
-                    return Runtime.PyLong_FromUnsignedLong((uint)value);
+                    return Runtime.Interop.PyLong_FromUnsignedLong((uint)value);
 
                 case TypeCode.UInt64:
-                    return Runtime.PyLong_FromUnsignedLongLong((ulong)value);
+                    return Runtime.Interop.PyLong_FromUnsignedLongLong((ulong)value);
 
                 default:
                     if (value is IEnumerable)
@@ -328,7 +328,7 @@ namespace Python.Runtime
 
             if (obType.IsGenericType && obType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                if( value == Runtime.PyNone )
+                if (value == Runtime.PyNone)
                 {
                     result = null;
                     return true;
@@ -376,7 +376,7 @@ namespace Python.Runtime
                     return ToPrimitive(value, doubleType, out result, setError);
                 }
 
-                if (Runtime.PySequence_Check(value))
+                if (Runtime.Interop.PySequence_Check(value))
                 {
                     return ToArray(value, typeof(object[]), out result, setError);
                 }
@@ -465,7 +465,7 @@ namespace Python.Runtime
                     // Trickery to support 64-bit platforms.
                     if (Runtime.IsPython2 && Runtime.Is32Bit)
                     {
-                        op = Runtime.PyNumber_Int(value);
+                        op = Runtime.Interop.PyNumber_Int(value);
 
                         // As of Python 2.3, large ints magically convert :(
                         if (Runtime.PyLong_Check(op))
@@ -482,14 +482,14 @@ namespace Python.Runtime
                             }
                             goto type_error;
                         }
-                        ival = (int)Runtime.PyInt_AsLong(op);
+                        ival = (int)Runtime.Interop.PyInt_AsLong(op);
                         Runtime.XDecref(op);
                         result = ival;
                         return true;
                     }
                     else // Python3 always use PyLong API
                     {
-                        op = Runtime.PyNumber_Long(value);
+                        op = Runtime.Interop.PyNumber_Long(value);
                         if (op == IntPtr.Zero)
                         {
                             Exceptions.Clear();
@@ -499,7 +499,7 @@ namespace Python.Runtime
                             }
                             goto type_error;
                         }
-                        long ll = (long)Runtime.PyLong_AsLongLong(op);
+                        long ll = (long)Runtime.Interop.PyLong_AsLongLong(op);
                         Runtime.XDecref(op);
                         if (ll == -1 && Exceptions.ErrorOccurred())
                         {
@@ -514,14 +514,14 @@ namespace Python.Runtime
                     }
 
                 case TypeCode.Boolean:
-                    result = Runtime.PyObject_IsTrue(value) != 0;
+                    result = Runtime.Interop.PyObject_IsTrue(value) != 0;
                     return true;
 
                 case TypeCode.Byte:
 #if PYTHON3
                     if (Runtime.PyObject_TypeCheck(value, Runtime.PyBytesType))
                     {
-                        if (Runtime.PyBytes_Size(value) == 1)
+                        if (Runtime.Interop.PyBytes_Size(value) == 1)
                         {
                             op = Runtime.PyBytes_AS_STRING(value);
                             result = (byte)Marshal.ReadByte(op);
@@ -542,7 +542,7 @@ namespace Python.Runtime
                     }
 #endif
 
-                    op = Runtime.PyNumber_Int(value);
+                    op = Runtime.Interop.PyNumber_Int(value);
                     if (op == IntPtr.Zero)
                     {
                         if (Exceptions.ExceptionMatches(overflow))
@@ -551,7 +551,7 @@ namespace Python.Runtime
                         }
                         goto type_error;
                     }
-                    ival = (int)Runtime.PyInt_AsLong(op);
+                    ival = (int)Runtime.Interop.PyInt_AsLong(op);
                     Runtime.XDecref(op);
 
                     if (ival > Byte.MaxValue || ival < Byte.MinValue)
@@ -566,7 +566,7 @@ namespace Python.Runtime
 #if PYTHON3
                     if (Runtime.PyObject_TypeCheck(value, Runtime.PyBytesType))
                     {
-                        if (Runtime.PyBytes_Size(value) == 1)
+                        if (Runtime.Interop.PyBytes_Size(value) == 1)
                         {
                             op = Runtime.PyBytes_AS_STRING(value);
                             result = (byte)Marshal.ReadByte(op);
@@ -587,7 +587,7 @@ namespace Python.Runtime
                     }
 #endif
 
-                    op = Runtime.PyNumber_Int(value);
+                    op = Runtime.Interop.PyNumber_Int(value);
                     if (op == IntPtr.Zero)
                     {
                         if (Exceptions.ExceptionMatches(overflow))
@@ -596,7 +596,7 @@ namespace Python.Runtime
                         }
                         goto type_error;
                     }
-                    ival = (int)Runtime.PyInt_AsLong(op);
+                    ival = (int)Runtime.Interop.PyInt_AsLong(op);
                     Runtime.XDecref(op);
 
                     if (ival > SByte.MaxValue || ival < SByte.MinValue)
@@ -611,7 +611,7 @@ namespace Python.Runtime
 #if PYTHON3
                     if (Runtime.PyObject_TypeCheck(value, Runtime.PyBytesType))
                     {
-                        if (Runtime.PyBytes_Size(value) == 1)
+                        if (Runtime.Interop.PyBytes_Size(value) == 1)
                         {
                             op = Runtime.PyBytes_AS_STRING(value);
                             result = (byte)Marshal.ReadByte(op);
@@ -633,9 +633,9 @@ namespace Python.Runtime
 #endif
                     else if (Runtime.PyObject_TypeCheck(value, Runtime.PyUnicodeType))
                     {
-                        if (Runtime.PyUnicode_GetSize(value) == 1)
+                        if (Runtime.Interop.PyUnicode_GetSize(value) == 1)
                         {
-                            op = Runtime.PyUnicode_AsUnicode(value);
+                            op = Runtime.Interop.PyUnicode_AsUnicode(value);
                             Char[] buff = new Char[1];
                             Marshal.Copy(op, buff, 0, 1);
                             result = buff[0];
@@ -644,12 +644,12 @@ namespace Python.Runtime
                         goto type_error;
                     }
 
-                    op = Runtime.PyNumber_Int(value);
+                    op = Runtime.Interop.PyNumber_Int(value);
                     if (op == IntPtr.Zero)
                     {
                         goto type_error;
                     }
-                    ival = Runtime.PyInt_AsLong(op);
+                    ival = Runtime.Interop.PyInt_AsLong(op);
                     Runtime.XDecref(op);
                     if (ival > Char.MaxValue || ival < Char.MinValue)
                     {
@@ -659,7 +659,7 @@ namespace Python.Runtime
                     return true;
 
                 case TypeCode.Int16:
-                    op = Runtime.PyNumber_Int(value);
+                    op = Runtime.Interop.PyNumber_Int(value);
                     if (op == IntPtr.Zero)
                     {
                         if (Exceptions.ExceptionMatches(overflow))
@@ -668,7 +668,7 @@ namespace Python.Runtime
                         }
                         goto type_error;
                     }
-                    ival = (int)Runtime.PyInt_AsLong(op);
+                    ival = (int)Runtime.Interop.PyInt_AsLong(op);
                     Runtime.XDecref(op);
                     if (ival > Int16.MaxValue || ival < Int16.MinValue)
                     {
@@ -679,7 +679,7 @@ namespace Python.Runtime
                     return true;
 
                 case TypeCode.Int64:
-                    op = Runtime.PyNumber_Long(value);
+                    op = Runtime.Interop.PyNumber_Long(value);
                     if (op == IntPtr.Zero)
                     {
                         if (Exceptions.ExceptionMatches(overflow))
@@ -688,7 +688,7 @@ namespace Python.Runtime
                         }
                         goto type_error;
                     }
-                    long l = (long)Runtime.PyLong_AsLongLong(op);
+                    long l = (long)Runtime.Interop.PyLong_AsLongLong(op);
                     Runtime.XDecref(op);
                     if ((l == -1) && Exceptions.ErrorOccurred())
                     {
@@ -698,7 +698,7 @@ namespace Python.Runtime
                     return true;
 
                 case TypeCode.UInt16:
-                    op = Runtime.PyNumber_Int(value);
+                    op = Runtime.Interop.PyNumber_Int(value);
                     if (op == IntPtr.Zero)
                     {
                         if (Exceptions.ExceptionMatches(overflow))
@@ -707,7 +707,7 @@ namespace Python.Runtime
                         }
                         goto type_error;
                     }
-                    ival = (int)Runtime.PyInt_AsLong(op);
+                    ival = (int)Runtime.Interop.PyInt_AsLong(op);
                     Runtime.XDecref(op);
                     if (ival > UInt16.MaxValue || ival < UInt16.MinValue)
                     {
@@ -718,7 +718,7 @@ namespace Python.Runtime
                     return true;
 
                 case TypeCode.UInt32:
-                    op = Runtime.PyNumber_Long(value);
+                    op = Runtime.Interop.PyNumber_Long(value);
                     if (op == IntPtr.Zero)
                     {
                         if (Exceptions.ExceptionMatches(overflow))
@@ -727,7 +727,7 @@ namespace Python.Runtime
                         }
                         goto type_error;
                     }
-                    uint ui = (uint)Runtime.PyLong_AsUnsignedLong(op);
+                    uint ui = (uint)Runtime.Interop.PyLong_AsUnsignedLong(op);
 
                     if (Exceptions.ErrorOccurred())
                     {
@@ -735,7 +735,7 @@ namespace Python.Runtime
                         goto overflow;
                     }
 
-                    IntPtr check = Runtime.PyLong_FromUnsignedLong(ui);
+                    IntPtr check = Runtime.Interop.PyLong_FromUnsignedLong(ui);
                     int err = Runtime.PyObject_Compare(check, op);
                     Runtime.XDecref(check);
                     Runtime.XDecref(op);
@@ -748,7 +748,7 @@ namespace Python.Runtime
                     return true;
 
                 case TypeCode.UInt64:
-                    op = Runtime.PyNumber_Long(value);
+                    op = Runtime.Interop.PyNumber_Long(value);
                     if (op == IntPtr.Zero)
                     {
                         if (Exceptions.ExceptionMatches(overflow))
@@ -757,7 +757,7 @@ namespace Python.Runtime
                         }
                         goto type_error;
                     }
-                    ulong ul = (ulong)Runtime.PyLong_AsUnsignedLongLong(op);
+                    ulong ul = (ulong)Runtime.Interop.PyLong_AsUnsignedLongLong(op);
                     Runtime.XDecref(op);
                     if (Exceptions.ErrorOccurred())
                     {
@@ -768,7 +768,7 @@ namespace Python.Runtime
 
 
                 case TypeCode.Single:
-                    op = Runtime.PyNumber_Float(value);
+                    op = Runtime.Interop.PyNumber_Float(value);
                     if (op == IntPtr.Zero)
                     {
                         if (Exceptions.ExceptionMatches(overflow))
@@ -777,7 +777,7 @@ namespace Python.Runtime
                         }
                         goto type_error;
                     }
-                    double dd = Runtime.PyFloat_AsDouble(op);
+                    double dd = Runtime.Interop.PyFloat_AsDouble(op);
                     Runtime.CheckExceptionOccurred();
                     Runtime.XDecref(op);
                     if (dd > Single.MaxValue || dd < Single.MinValue)
@@ -791,12 +791,12 @@ namespace Python.Runtime
                     return true;
 
                 case TypeCode.Double:
-                    op = Runtime.PyNumber_Float(value);
+                    op = Runtime.Interop.PyNumber_Float(value);
                     if (op == IntPtr.Zero)
                     {
                         goto type_error;
                     }
-                    double d = Runtime.PyFloat_AsDouble(op);
+                    double d = Runtime.Interop.PyFloat_AsDouble(op);
                     Runtime.CheckExceptionOccurred();
                     Runtime.XDecref(op);
                     result = d;
@@ -827,7 +827,7 @@ namespace Python.Runtime
 
         private static void SetConversionError(IntPtr value, Type target)
         {
-            IntPtr ob = Runtime.PyObject_Repr(value);
+            IntPtr ob = Runtime.Interop.PyObject_Repr(value);
             string src = Runtime.GetManagedString(ob);
             Runtime.XDecref(ob);
             Exceptions.SetError(Exceptions.TypeError, $"Cannot convert {src} to {target}");
@@ -842,7 +842,7 @@ namespace Python.Runtime
         private static bool ToArray(IntPtr value, Type obType, out object result, bool setError)
         {
             Type elementType = obType.GetElementType();
-            int size = Runtime.PySequence_Size(value);
+            int size = Runtime.Interop.PySequence_Size(value);
             result = null;
 
             if (size < 0)
@@ -860,7 +860,7 @@ namespace Python.Runtime
             for (var i = 0; i < size; i++)
             {
                 object obj = null;
-                IntPtr item = Runtime.PySequence_GetItem(value, i);
+                IntPtr item = Runtime.Interop.PySequence_GetItem(value, i);
                 if (item == IntPtr.Zero)
                 {
                     if (setError)

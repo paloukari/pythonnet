@@ -33,7 +33,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyIter(PyObject iterable)
         {
-            obj = Runtime.PyObject_GetIter(iterable.obj);
+            obj = Runtime.Interop.PyObject_GetIter(iterable.obj);
             if (obj == IntPtr.Zero)
             {
                 throw new PythonException();
@@ -59,7 +59,7 @@ namespace Python.Runtime
                 _current = null;
             }
 
-            IntPtr next = Runtime.PyIter_Next(obj);
+            IntPtr next = Runtime.Interop.PyIter_Next(obj);
             if (next == IntPtr.Zero)
             {
                 return false;

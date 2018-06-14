@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Python.Runtime
@@ -9,7 +9,7 @@ namespace Python.Runtime
 
         internal CLRObject(object ob, IntPtr tp)
         {
-            IntPtr py = Runtime.PyType_GenericAlloc(tp, 0);
+            IntPtr py = Runtime.Interop.PyType_GenericAlloc(tp, 0);
 
             long flags = Util.ReadCLong(tp, TypeOffset.tp_flags);
             if ((flags & TypeFlags.Subclass) != 0)
@@ -17,7 +17,7 @@ namespace Python.Runtime
                 IntPtr dict = Marshal.ReadIntPtr(py, ObjectOffset.DictOffset(tp));
                 if (dict == IntPtr.Zero)
                 {
-                    dict = Runtime.PyDict_New();
+                    dict = Runtime.Interop.PyDict_New();
                     Marshal.WriteIntPtr(py, ObjectOffset.DictOffset(tp), dict);
                 }
             }

@@ -150,7 +150,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyInt(string value)
         {
-            obj = Runtime.PyInt_FromString(value, IntPtr.Zero, 0);
+            obj = Runtime.Interop.PyInt_FromString(value, IntPtr.Zero, 0);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -177,7 +177,7 @@ namespace Python.Runtime
         /// </remarks>
         public static PyInt AsInt(PyObject value)
         {
-            IntPtr op = Runtime.PyNumber_Int(value.obj);
+            IntPtr op = Runtime.Interop.PyNumber_Int(value.obj);
             Runtime.CheckExceptionOccurred();
             return new PyInt(op);
         }
@@ -203,7 +203,7 @@ namespace Python.Runtime
         /// </remarks>
         public int ToInt32()
         {
-            return Runtime.PyInt_AsLong(obj);
+            return Runtime.Interop.PyInt_AsLong(obj);
         }
 
 

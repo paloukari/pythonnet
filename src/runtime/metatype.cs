@@ -29,27 +29,27 @@ namespace Python.Runtime
         /// </summary>
         public static IntPtr tp_new(IntPtr tp, IntPtr args, IntPtr kw)
         {
-            int len = Runtime.PyTuple_Size(args);
+            int len = Runtime.Interop.PyTuple_Size(args);
             if (len < 3)
             {
                 return Exceptions.RaiseTypeError("invalid argument list");
             }
 
-            IntPtr name = Runtime.PyTuple_GetItem(args, 0);
-            IntPtr bases = Runtime.PyTuple_GetItem(args, 1);
-            IntPtr dict = Runtime.PyTuple_GetItem(args, 2);
+            IntPtr name = Runtime.Interop.PyTuple_GetItem(args, 0);
+            IntPtr bases = Runtime.Interop.PyTuple_GetItem(args, 1);
+            IntPtr dict = Runtime.Interop.PyTuple_GetItem(args, 2);
 
             // We do not support multiple inheritance, so the bases argument
             // should be a 1-item tuple containing the type we are subtyping.
             // That type must itself have a managed implementation. We check
             // that by making sure its metatype is the CLR metatype.
 
-            if (Runtime.PyTuple_Size(bases) != 1)
+            if (Runtime.Interop.PyTuple_Size(bases) != 1)
             {
                 return Exceptions.RaiseTypeError("cannot use multiple inheritance with managed classes");
             }
 
-            IntPtr base_type = Runtime.PyTuple_GetItem(bases, 0);
+            IntPtr base_type = Runtime.Interop.PyTuple_GetItem(bases, 0);
             IntPtr mt = Runtime.PyObject_TYPE(base_type);
 
             if (!(mt == PyCLRMetaType || mt == Runtime.PyTypeType))
@@ -69,7 +69,7 @@ namespace Python.Runtime
                 }
             }
 
-            IntPtr slots = Runtime.PyDict_GetItemString(dict, "__slots__");
+            IntPtr slots = Runtime.Interop.PyDict_GetItemString(dict, "__slots__");
             if (slots != IntPtr.Zero)
             {
                 return Exceptions.RaiseTypeError("subclasses of managed classes do not support __slots__");
@@ -127,14 +127,14 @@ namespace Python.Runtime
 
         public static IntPtr tp_alloc(IntPtr mt, int n)
         {
-            IntPtr type = Runtime.PyType_GenericAlloc(mt, n);
+            IntPtr type = Runtime.Interop.PyType_GenericAlloc(mt, n);
             return type;
         }
 
 
         public static void tp_free(IntPtr tp)
         {
-            Runtime.PyObject_GC_Del(tp);
+            Runtime.Interop.PyObject_GC_Del(tp);
         }
 
 
@@ -157,12 +157,12 @@ namespace Python.Runtime
                 return IntPtr.Zero;
             }
 
-            var init = Runtime.PyObject_GetAttrString(obj, "__init__");
-            Runtime.PyErr_Clear();
+            var init = Runtime.Interop.PyObject_GetAttrString(obj, "__init__");
+            Runtime.Interop.PyErr_Clear();
 
             if (init != IntPtr.Zero)
             {
-                IntPtr result = Runtime.PyObject_Call(init, args, kw);
+                IntPtr result = Runtime.Interop.PyObject_Call(init, args, kw);
                 Runtime.XDecref(init);
 
                 if (result == IntPtr.Zero)
@@ -187,7 +187,7 @@ namespace Python.Runtime
         /// </summary>
         public static int tp_setattro(IntPtr tp, IntPtr name, IntPtr value)
         {
-            IntPtr descr = Runtime._PyType_Lookup(tp, name);
+            IntPtr descr = Runtime.Interop._PyType_Lookup(tp, name);
 
             if (descr != IntPtr.Zero)
             {
@@ -208,8 +208,8 @@ namespace Python.Runtime
                 }
             }
 
-            int res = Runtime.PyObject_GenericSetAttr(tp, name, value);
-            Runtime.PyType_Modified(tp);
+            int res = Runtime.Interop.PyObject_GenericSetAttr(tp, name, value);
+            Runtime.Interop.PyType_Modified(tp);
 
             return res;
         }

@@ -140,7 +140,7 @@ namespace Python.Runtime
             {
                 var item = (ManagedType)iter.Value;
                 var name = (string)iter.Key;
-                Runtime.PyDict_SetItemString(dict, name, item.pyHandle);
+                Runtime.Interop.PyDict_SetItemString(dict, name, item.pyHandle);
             }
 
             // If class has constructors, generate an __doc__ attribute.
@@ -156,7 +156,7 @@ namespace Python.Runtime
                 var attr = (DocStringAttribute)attrs[0];
                 string docStr = attr.DocString;
                 doc = Runtime.PyString_FromString(docStr);
-                Runtime.PyDict_SetItemString(dict, "__doc__", doc);
+                Runtime.Interop.PyDict_SetItemString(dict, "__doc__", doc);
                 Runtime.XDecref(doc);
             }
 
@@ -173,15 +173,15 @@ namespace Python.Runtime
                         var ctors = new ConstructorBinding(type, tp, co.binder);
                         // ExtensionType types are untracked, so don't Incref() them.
                         // TODO: deprecate __overloads__ soon...
-                        Runtime.PyDict_SetItemString(dict, "__overloads__", ctors.pyHandle);
-                        Runtime.PyDict_SetItemString(dict, "Overloads", ctors.pyHandle);
+                        Runtime.Interop.PyDict_SetItemString(dict, "__overloads__", ctors.pyHandle);
+                        Runtime.Interop.PyDict_SetItemString(dict, "Overloads", ctors.pyHandle);
                     }
 
                     // don't generate the docstring if one was already set from a DocStringAttribute.
                     if (!CLRModule._SuppressDocs && doc == IntPtr.Zero)
                     {
                         doc = co.GetDocString();
-                        Runtime.PyDict_SetItemString(dict, "__doc__", doc);
+                        Runtime.Interop.PyDict_SetItemString(dict, "__doc__", doc);
                         Runtime.XDecref(doc);
                     }
                 }

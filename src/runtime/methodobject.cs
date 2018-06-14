@@ -129,7 +129,7 @@ namespace Python.Runtime
                 return doc;
             }
 
-            return Runtime.PyObject_GenericGetAttr(ob, key);
+            return Runtime.Interop.PyObject_GenericGetAttr(ob, key);
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace Python.Runtime
                 return binding.pyHandle;
             }
 
-            if (Runtime.PyObject_IsInstance(ob, tp) < 1)
+            if (Runtime.Interop.PyObject_IsInstance(ob, tp) < 1)
             {
                 return Exceptions.RaiseTypeError("invalid argument");
             }

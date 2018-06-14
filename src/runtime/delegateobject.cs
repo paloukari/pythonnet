@@ -51,14 +51,14 @@ namespace Python.Runtime
         {
             var self = (DelegateObject)GetManagedObject(tp);
 
-            if (Runtime.PyTuple_Size(args) != 1)
+            if (Runtime.Interop.PyTuple_Size(args) != 1)
             {
                 return Exceptions.RaiseTypeError("class takes exactly one argument");
             }
 
-            IntPtr method = Runtime.PyTuple_GetItem(args, 0);
+            IntPtr method = Runtime.Interop.PyTuple_GetItem(args, 0);
 
-            if (Runtime.PyCallable_Check(method) != 1)
+            if (Runtime.Interop.PyCallable_Check(method) != 1)
             {
                 return Exceptions.RaiseTypeError("argument must be callable");
             }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -88,11 +88,11 @@ namespace Python.Runtime
                         TypeFlags.HeapType | TypeFlags.HaveGC;
             Util.WriteCLong(type, TypeOffset.tp_flags, flags);
 
-            Runtime.PyType_Ready(type);
+            Runtime.Interop.PyType_Ready(type);
 
             IntPtr dict = Marshal.ReadIntPtr(type, TypeOffset.tp_dict);
             IntPtr mod = Runtime.PyString_FromString("CLR");
-            Runtime.PyDict_SetItemString(dict, "__module__", mod);
+            Runtime.Interop.PyDict_SetItemString(dict, "__module__", mod);
 
             InitMethods(type, impl);
 
@@ -166,12 +166,12 @@ namespace Python.Runtime
             // that the type of the new type must PyType_Type at the time we
             // call this, else PyType_Ready will skip some slot initialization.
 
-            Runtime.PyType_Ready(type);
+            Runtime.Interop.PyType_Ready(type);
 
             IntPtr dict = Marshal.ReadIntPtr(type, TypeOffset.tp_dict);
             string mn = clrType.Namespace ?? "";
             IntPtr mod = Runtime.PyString_FromString(mn);
-            Runtime.PyDict_SetItemString(dict, "__module__", mod);
+            Runtime.Interop.PyDict_SetItemString(dict, "__module__", mod);
 
             // Hide the gchandle of the implementation in a magic type slot.
             GCHandle gc = GCHandle.Alloc(impl);
@@ -203,9 +203,9 @@ namespace Python.Runtime
             {
                 var assemblyKey = new PyObject(Converter.ToPython("__assembly__", typeof(string)));
                 disposeList.Add(assemblyKey);
-                if (0 != Runtime.PyMapping_HasKey(py_dict, assemblyKey.Handle))
+                if (0 != Runtime.Interop.PyMapping_HasKey(py_dict, assemblyKey.Handle))
                 {
-                    var pyAssembly = new PyObject(Runtime.PyDict_GetItem(py_dict, assemblyKey.Handle));
+                    var pyAssembly = new PyObject(Runtime.Interop.PyDict_GetItem(py_dict, assemblyKey.Handle));
                     Runtime.XIncref(pyAssembly.Handle);
                     disposeList.Add(pyAssembly);
                     if (!Converter.ToManagedValue(pyAssembly.Handle, typeof(string), out assembly, false))
@@ -216,9 +216,9 @@ namespace Python.Runtime
 
                 var namespaceKey = new PyObject(Converter.ToPythonImplicit("__namespace__"));
                 disposeList.Add(namespaceKey);
-                if (0 != Runtime.PyMapping_HasKey(py_dict, namespaceKey.Handle))
+                if (0 != Runtime.Interop.PyMapping_HasKey(py_dict, namespaceKey.Handle))
                 {
-                    var pyNamespace = new PyObject(Runtime.PyDict_GetItem(py_dict, namespaceKey.Handle));
+                    var pyNamespace = new PyObject(Runtime.Interop.PyDict_GetItem(py_dict, namespaceKey.Handle));
                     Runtime.XIncref(pyNamespace.Handle);
                     disposeList.Add(pyNamespace);
                     if (!Converter.ToManagedValue(pyNamespace.Handle, typeof(string), out namespaceStr, false))
@@ -257,7 +257,7 @@ namespace Python.Runtime
                 // by default the class dict will have all the C# methods in it, but as this is a
                 // derived class we want the python overrides in there instead if they exist.
                 IntPtr cls_dict = Marshal.ReadIntPtr(py_type, TypeOffset.tp_dict);
-                Runtime.PyDict_Update(cls_dict, py_dict);
+                Runtime.Interop.PyDict_Update(cls_dict, py_dict);
 
                 return py_type;
             }
@@ -327,7 +327,7 @@ namespace Python.Runtime
 
             // We need space for 3 PyMethodDef structs, each of them
             // 4 int-ptrs in size.
-            IntPtr mdef = Runtime.PyMem_Malloc(3 * 4 * IntPtr.Size);
+            IntPtr mdef = Runtime.Interop.PyMem_Malloc(3 * 4 * IntPtr.Size);
             IntPtr mdefStart = mdef;
             mdef = WriteMethodDef(
                 mdef,
@@ -346,11 +346,11 @@ namespace Python.Runtime
 
             Marshal.WriteIntPtr(type, TypeOffset.tp_methods, mdefStart);
 
-            Runtime.PyType_Ready(type);
+            Runtime.Interop.PyType_Ready(type);
 
             IntPtr dict = Marshal.ReadIntPtr(type, TypeOffset.tp_dict);
             IntPtr mod = Runtime.PyString_FromString("CLR");
-            Runtime.PyDict_SetItemString(dict, "__module__", mod);
+            Runtime.Interop.PyDict_SetItemString(dict, "__module__", mod);
 
             //DebugUtil.DumpType(type);
 
@@ -388,11 +388,11 @@ namespace Python.Runtime
 
             InitializeSlots(type, impl);
 
-            Runtime.PyType_Ready(type);
+            Runtime.Interop.PyType_Ready(type);
 
             IntPtr tp_dict = Marshal.ReadIntPtr(type, TypeOffset.tp_dict);
             IntPtr mod = Runtime.PyString_FromString("CLR");
-            Runtime.PyDict_SetItemString(tp_dict, "__module__", mod);
+            Runtime.Interop.PyDict_SetItemString(tp_dict, "__module__", mod);
 
             return type;
         }
@@ -403,7 +403,7 @@ namespace Python.Runtime
         /// </summary>
         internal static IntPtr AllocateTypeObject(string name)
         {
-            IntPtr type = Runtime.PyType_GenericAlloc(Runtime.PyTypeType, 0);
+            IntPtr type = Runtime.Interop.PyType_GenericAlloc(Runtime.PyTypeType, 0);
 
             // Cheat a little: we'll set tp_name to the internal char * of
             // the Python version of the type name - otherwise we'd have to
@@ -412,7 +412,7 @@ namespace Python.Runtime
             // For python3 we leak two objects. One for the ASCII representation
             // required for tp_name, and another for the Unicode representation
             // for ht_name.
-            IntPtr temp = Runtime.PyBytes_FromString(name);
+            IntPtr temp = Runtime.Interop.PyBytes_FromString(name);
             IntPtr raw = Runtime.PyBytes_AS_STRING(temp);
             temp = Runtime.PyUnicode_FromString(name);
 #elif PYTHON2
@@ -519,7 +519,7 @@ namespace Python.Runtime
                             var mi = new MethodInfo[1];
                             mi[0] = method;
                             MethodObject m = new TypeMethod(type, method_name, mi);
-                            Runtime.PyDict_SetItemString(dict, method_name, m.pyHandle);
+                            Runtime.Interop.PyDict_SetItemString(dict, method_name, m.pyHandle);
                             addedMethods.Add(method_name);
                         }
                     }

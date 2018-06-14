@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -60,7 +60,7 @@ namespace Python.Runtime
             var self = (CLRObject)GetManagedObject(ob);
 
             // don't let the python GC destroy this object
-            Runtime.PyObject_GC_UnTrack(self.pyHandle);
+            Runtime.Interop.PyObject_GC_UnTrack(self.pyHandle);
 
             // The python should now have a ref count of 0, but we don't actually want to
             // deallocate the object until the C# object that references it is destroyed.
@@ -98,7 +98,7 @@ namespace Python.Runtime
                 self.gcHandle = gc;
 
                 // now the object has a python reference it's safe for the python GC to track it
-                Runtime.PyObject_GC_Track(self.pyHandle);
+                Runtime.Interop.PyObject_GC_Track(self.pyHandle);
             }
 
             return self.pyHandle;
@@ -631,7 +631,7 @@ namespace Python.Runtime
             if (null != self)
             {
                 var disposeList = new List<PyObject>();
-                IntPtr gs = Runtime.PyGILState_Ensure();
+                IntPtr gs = Runtime.Interop.PyGILState_Ensure();
                 try
                 {
                     Runtime.XIncref(self.pyHandle);
@@ -669,7 +669,7 @@ namespace Python.Runtime
                     {
                         x?.Dispose();
                     }
-                    Runtime.PyGILState_Release(gs);
+                    Runtime.Interop.PyGILState_Release(gs);
                 }
             }
 
@@ -693,7 +693,7 @@ namespace Python.Runtime
             if (null != self)
             {
                 var disposeList = new List<PyObject>();
-                IntPtr gs = Runtime.PyGILState_Ensure();
+                IntPtr gs = Runtime.Interop.PyGILState_Ensure();
                 try
                 {
                     Runtime.XIncref(self.pyHandle);
@@ -731,7 +731,7 @@ namespace Python.Runtime
                     {
                         x?.Dispose();
                     }
-                    Runtime.PyGILState_Release(gs);
+                    Runtime.Interop.PyGILState_Release(gs);
                 }
             }
 
@@ -757,7 +757,7 @@ namespace Python.Runtime
                 throw new NullReferenceException("Instance must be specified when getting a property");
             }
 
-            IntPtr gs = Runtime.PyGILState_Ensure();
+            IntPtr gs = Runtime.Interop.PyGILState_Ensure();
             try
             {
                 Runtime.XIncref(self.pyHandle);
@@ -769,7 +769,7 @@ namespace Python.Runtime
             }
             finally
             {
-                Runtime.PyGILState_Release(gs);
+                Runtime.Interop.PyGILState_Release(gs);
             }
         }
 
@@ -783,7 +783,7 @@ namespace Python.Runtime
                 throw new NullReferenceException("Instance must be specified when setting a property");
             }
 
-            IntPtr gs = Runtime.PyGILState_Ensure();
+            IntPtr gs = Runtime.Interop.PyGILState_Ensure();
             try
             {
                 Runtime.XIncref(self.pyHandle);
@@ -795,7 +795,7 @@ namespace Python.Runtime
             }
             finally
             {
-                Runtime.PyGILState_Release(gs);
+                Runtime.Interop.PyGILState_Release(gs);
             }
         }
 
@@ -809,7 +809,7 @@ namespace Python.Runtime
                 args);
 
             CLRObject self = null;
-            IntPtr gs = Runtime.PyGILState_Ensure();
+            IntPtr gs = Runtime.Interop.PyGILState_Ensure();
             try
             {
                 // create the python object
@@ -831,7 +831,7 @@ namespace Python.Runtime
                     Runtime.XDecref(self.pyHandle);
                 }
 
-                Runtime.PyGILState_Release(gs);
+                Runtime.Interop.PyGILState_Release(gs);
             }
         }
 
@@ -843,7 +843,7 @@ namespace Python.Runtime
             // If python's been terminated then just free the gchandle.
             lock (Runtime.IsFinalizingLock)
             {
-                if (0 == Runtime.Py_IsInitialized() || Runtime.IsFinalizing)
+                if (0 == Runtime.Interop.Py_IsInitialized() || Runtime.IsFinalizing)
                 {
                     self.gcHandle.Free();
                     return;
@@ -858,13 +858,13 @@ namespace Python.Runtime
                 lock (Runtime.IsFinalizingLock)
                 {
                     // If python's been terminated then just free the gchandle.
-                    if (0 == Runtime.Py_IsInitialized() || Runtime.IsFinalizing)
+                    if (0 == Runtime.Interop.Py_IsInitialized() || Runtime.IsFinalizing)
                     {
                         self.gcHandle.Free();
                         return;
                     }
 
-                    IntPtr gs = Runtime.PyGILState_Ensure();
+                    IntPtr gs = Runtime.Interop.PyGILState_Ensure();
                     try
                     {
                         // the C# object is being destroyed which must mean there are no more
@@ -875,12 +875,12 @@ namespace Python.Runtime
                         {
                             Runtime.XDecref(dict);
                         }
-                        Runtime.PyObject_GC_Del(self.pyHandle);
+                        Runtime.Interop.PyObject_GC_Del(self.pyHandle);
                         self.gcHandle.Free();
                     }
                     finally
                     {
-                        Runtime.PyGILState_Release(gs);
+                        Runtime.Interop.PyGILState_Release(gs);
                     }
                 }
             });

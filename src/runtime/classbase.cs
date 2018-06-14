@@ -276,8 +276,8 @@ namespace Python.Runtime
             {
                 Runtime.XDecref(dict);
             }
-            Runtime.PyObject_GC_UnTrack(self.pyHandle);
-            Runtime.PyObject_GC_Del(self.pyHandle);
+            Runtime.Interop.PyObject_GC_UnTrack(self.pyHandle);
+            Runtime.Interop.PyObject_GC_Del(self.pyHandle);
             Runtime.XDecref(self.tpHandle);
             self.gcHandle.Free();
         }

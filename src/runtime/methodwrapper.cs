@@ -22,14 +22,14 @@ namespace Python.Runtime
             // Allocate and initialize a PyMethodDef structure to represent
             // the managed method, then create a PyCFunction.
 
-            mdef = Runtime.PyMem_Malloc(4 * IntPtr.Size);
+            mdef = Runtime.Interop.PyMem_Malloc(4 * IntPtr.Size);
             TypeManager.WriteMethodDef(mdef, name, fp, 0x0003);
-            ptr = Runtime.PyCFunction_NewEx(mdef, IntPtr.Zero, IntPtr.Zero);
+            ptr = Runtime.Interop.PyCFunction_NewEx(mdef, IntPtr.Zero, IntPtr.Zero);
         }
 
         public IntPtr Call(IntPtr args, IntPtr kw)
         {
-            return Runtime.PyCFunction_Call(ptr, args, kw);
+            return Runtime.Interop.PyCFunction_Call(ptr, args, kw);
         }
     }
 }

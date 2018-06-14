@@ -67,13 +67,13 @@ namespace Python.Runtime
             // convertible primitive types, just convert the arg directly.
             if (type.IsPrimitive || type == typeof(string))
             {
-                if (Runtime.PyTuple_Size(args) != 1)
+                if (Runtime.Interop.PyTuple_Size(args) != 1)
                 {
                     Exceptions.SetError(Exceptions.TypeError, "no constructors match given arguments");
                     return IntPtr.Zero;
                 }
 
-                IntPtr op = Runtime.PyTuple_GetItem(args, 0);
+                IntPtr op = Runtime.Interop.PyTuple_GetItem(args, 0);
                 object result;
 
                 if (!Converter.ToManaged(op, type, out result, true))
@@ -177,9 +177,9 @@ namespace Python.Runtime
 
             if (!Runtime.PyTuple_Check(idx))
             {
-                args = Runtime.PyTuple_New(1);
+                args = Runtime.Interop.PyTuple_New(1);
                 Runtime.XIncref(idx);
-                Runtime.PyTuple_SetItem(args, 0, idx);
+                Runtime.Interop.PyTuple_SetItem(args, 0, idx);
                 free = true;
             }
 
@@ -223,31 +223,31 @@ namespace Python.Runtime
 
             if (!Runtime.PyTuple_Check(idx))
             {
-                args = Runtime.PyTuple_New(1);
+                args = Runtime.Interop.PyTuple_New(1);
                 Runtime.XIncref(idx);
-                Runtime.PyTuple_SetItem(args, 0, idx);
+                Runtime.Interop.PyTuple_SetItem(args, 0, idx);
                 free = true;
             }
 
             // Get the args passed in.
-            int i = Runtime.PyTuple_Size(args);
+            int i = Runtime.Interop.PyTuple_Size(args);
             IntPtr defaultArgs = cls.indexer.GetDefaultArgs(args);
-            int numOfDefaultArgs = Runtime.PyTuple_Size(defaultArgs);
+            int numOfDefaultArgs = Runtime.Interop.PyTuple_Size(defaultArgs);
             int temp = i + numOfDefaultArgs;
-            IntPtr real = Runtime.PyTuple_New(temp + 1);
+            IntPtr real = Runtime.Interop.PyTuple_New(temp + 1);
             for (var n = 0; n < i; n++)
             {
-                IntPtr item = Runtime.PyTuple_GetItem(args, n);
+                IntPtr item = Runtime.Interop.PyTuple_GetItem(args, n);
                 Runtime.XIncref(item);
-                Runtime.PyTuple_SetItem(real, n, item);
+                Runtime.Interop.PyTuple_SetItem(real, n, item);
             }
 
             // Add Default Args if needed
             for (var n = 0; n < numOfDefaultArgs; n++)
             {
-                IntPtr item = Runtime.PyTuple_GetItem(defaultArgs, n);
+                IntPtr item = Runtime.Interop.PyTuple_GetItem(defaultArgs, n);
                 Runtime.XIncref(item);
-                Runtime.PyTuple_SetItem(real, n + i, item);
+                Runtime.Interop.PyTuple_SetItem(real, n + i, item);
             }
             // no longer need defaultArgs
             Runtime.XDecref(defaultArgs);
@@ -255,7 +255,7 @@ namespace Python.Runtime
 
             // Add value to argument list
             Runtime.XIncref(v);
-            Runtime.PyTuple_SetItem(real, i, v);
+            Runtime.Interop.PyTuple_SetItem(real, i, v);
 
             try
             {

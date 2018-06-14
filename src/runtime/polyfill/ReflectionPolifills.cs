@@ -4,7 +4,7 @@ using System.Reflection.Emit;
 
 namespace Python.Runtime
 {
-#if NETSTANDARD
+#if NETSTANDARD || NETCOREAPP
     public static class ReflectionPolifills
     {
         public static AssemblyBuilder DefineDynamicAssembly(this AppDomain appDomain, AssemblyName assemblyName, AssemblyBuilderAccess assemblyBuilderAccess)

@@ -279,7 +279,7 @@ namespace Python.Runtime
         {
             // loop to find match, return invoker w/ or /wo error
             MethodBase[] _methods = null;
-            int pynargs = Runtime.PyTuple_Size(args);
+            int pynargs = Runtime.Interop.PyTuple_Size(args);
             object arg;
             var isGeneric = false;
             ArrayList defaultArgList = null;
@@ -347,11 +347,11 @@ namespace Python.Runtime
                             {
                                 // map remaining Python arguments to a tuple since
                                 // the managed function accepts it - hopefully :]
-                                op = Runtime.PyTuple_GetSlice(args, arrayStart, pynargs);
+                                op = Runtime.Interop.PyTuple_GetSlice(args, arrayStart, pynargs);
                             }
                             else
                             {
-                                op = Runtime.PyTuple_GetItem(args, n);
+                                op = Runtime.Interop.PyTuple_GetItem(args, n);
                             }
 
                             // this logic below handles cases when multiple overloading methods
@@ -557,9 +557,9 @@ namespace Python.Runtime
                 int c = pi.Length;
                 var n = 0;
 
-                IntPtr t = Runtime.PyTuple_New(binding.outs + 1);
+                IntPtr t = Runtime.Interop.PyTuple_New(binding.outs + 1);
                 IntPtr v = Converter.ToPython(result, mi.ReturnType);
-                Runtime.PyTuple_SetItem(t, n, v);
+                Runtime.Interop.PyTuple_SetItem(t, n, v);
                 n++;
 
                 for (var i = 0; i < c; i++)
@@ -568,14 +568,14 @@ namespace Python.Runtime
                     if (pi[i].IsOut || pt.IsByRef)
                     {
                         v = Converter.ToPython(binding.args[i], pt);
-                        Runtime.PyTuple_SetItem(t, n, v);
+                        Runtime.Interop.PyTuple_SetItem(t, n, v);
                         n++;
                     }
                 }
 
                 if (binding.outs == 1 && mi.ReturnType == typeof(void))
                 {
-                    v = Runtime.PyTuple_GetItem(t, 1);
+                    v = Runtime.Interop.PyTuple_GetItem(t, 1);
                     Runtime.XIncref(v);
                     Runtime.XDecref(t);
                     return v;

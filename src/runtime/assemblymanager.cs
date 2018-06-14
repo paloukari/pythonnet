@@ -131,15 +131,15 @@ namespace Python.Runtime
         /// </summary>
         internal static void UpdatePath()
         {
-            IntPtr list = Runtime.PySys_GetObject("path");
-            int count = Runtime.PyList_Size(list);
+            IntPtr list = Runtime.Interop.PySys_GetObject("path");
+            int count = Runtime.Interop.PyList_Size(list);
             if (count != pypath.Count)
             {
                 pypath.Clear();
                 probed.Clear();
                 for (var i = 0; i < count; i++)
                 {
-                    IntPtr item = Runtime.PyList_GetItem(list, i);
+                    IntPtr item = Runtime.Interop.PyList_GetItem(list, i);
                     string path = Runtime.GetManagedString(item);
                     if (path != null)
                     {
@@ -422,8 +422,9 @@ namespace Python.Runtime
                     Type[] types = a.GetTypes();
                     foreach (Type t in types)
                     {
-                        if ((t.Namespace ?? "") == nsname)
-                        {
+                        //if ((t.Namespace ?? "") == nsname)
+                        if (t.Namespace == nsname)
+                            {
                             names.Add(t.Name);
                         }
                     }

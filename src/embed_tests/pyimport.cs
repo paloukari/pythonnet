@@ -38,8 +38,8 @@ namespace Python.EmbeddingTest
             string testPath = Path.Combine(TestContext.CurrentContext.TestDirectory, s);
 
             IntPtr str = Runtime.Runtime.PyString_FromString(testPath);
-            IntPtr path = Runtime.Runtime.PySys_GetObject("path");
-            Runtime.Runtime.PyList_Append(path, str);
+            IntPtr path = Runtime.Runtime.Interop.PySys_GetObject("path");
+            Runtime.Runtime.Interop.PyList_Append(path, str);
         }
 
         [TearDown]

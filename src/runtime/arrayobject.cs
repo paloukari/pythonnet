@@ -22,11 +22,11 @@ namespace Python.Runtime
         public static IntPtr tp_new(IntPtr tp, IntPtr args, IntPtr kw)
         {
             var self = GetManagedObject(tp) as ArrayObject;
-            if (Runtime.PyTuple_Size(args) != 1)
+            if (Runtime.Interop.PyTuple_Size(args) != 1)
             {
                 return Exceptions.RaiseTypeError("array expects 1 argument");
             }
-            IntPtr op = Runtime.PyTuple_GetItem(args, 0);
+            IntPtr op = Runtime.Interop.PyTuple_GetItem(args, 0);
             object result;
 
             if (!Converter.ToManaged(op, self.type, out result, true))
@@ -60,7 +60,7 @@ namespace Python.Runtime
 
             if (rank == 1)
             {
-                index = Runtime.PyInt_AsLong(idx);
+                index = Runtime.Interop.PyInt_AsLong(idx);
 
                 if (Exceptions.ErrorOccurred())
                 {
@@ -93,14 +93,14 @@ namespace Python.Runtime
                 return IntPtr.Zero;
             }
 
-            int count = Runtime.PyTuple_Size(idx);
+            int count = Runtime.Interop.PyTuple_Size(idx);
 
             var args = new int[count];
 
             for (var i = 0; i < count; i++)
             {
-                IntPtr op = Runtime.PyTuple_GetItem(idx, i);
-                index = Runtime.PyInt_AsLong(op);
+                IntPtr op = Runtime.Interop.PyTuple_GetItem(idx, i);
+                index = Runtime.Interop.PyInt_AsLong(op);
 
                 if (Exceptions.ErrorOccurred())
                 {
@@ -154,7 +154,7 @@ namespace Python.Runtime
 
             if (rank == 1)
             {
-                index = Runtime.PyInt_AsLong(idx);
+                index = Runtime.Interop.PyInt_AsLong(idx);
 
                 if (Exceptions.ErrorOccurred())
                 {
@@ -186,13 +186,13 @@ namespace Python.Runtime
                 return -1;
             }
 
-            int count = Runtime.PyTuple_Size(idx);
+            int count = Runtime.Interop.PyTuple_Size(idx);
             var args = new int[count];
 
             for (var i = 0; i < count; i++)
             {
-                IntPtr op = Runtime.PyTuple_GetItem(idx, i);
-                index = Runtime.PyInt_AsLong(op);
+                IntPtr op = Runtime.Interop.PyTuple_GetItem(idx, i);
+                index = Runtime.Interop.PyInt_AsLong(op);
 
                 if (Exceptions.ErrorOccurred())
                 {

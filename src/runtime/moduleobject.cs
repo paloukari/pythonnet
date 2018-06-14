@@ -40,15 +40,15 @@ namespace Python.Runtime
                 docstring += "- " + a.FullName + "\n";
             }
 
-            dict = Runtime.PyDict_New();
+            dict = Runtime.Interop.PyDict_New();
             IntPtr pyname = Runtime.PyString_FromString(moduleName);
             IntPtr pyfilename = Runtime.PyString_FromString(filename);
             IntPtr pydocstring = Runtime.PyString_FromString(docstring);
             IntPtr pycls = TypeManager.GetTypeHandle(GetType());
-            Runtime.PyDict_SetItemString(dict, "__name__", pyname);
-            Runtime.PyDict_SetItemString(dict, "__file__", pyfilename);
-            Runtime.PyDict_SetItemString(dict, "__doc__", pydocstring);
-            Runtime.PyDict_SetItemString(dict, "__class__", pycls);
+            Runtime.Interop.PyDict_SetItemString(dict, "__name__", pyname);
+            Runtime.Interop.PyDict_SetItemString(dict, "__file__", pyfilename);
+            Runtime.Interop.PyDict_SetItemString(dict, "__doc__", pydocstring);
+            Runtime.Interop.PyDict_SetItemString(dict, "__class__", pycls);
             Runtime.XDecref(pyname);
             Runtime.XDecref(pyfilename);
             Runtime.XDecref(pydocstring);
@@ -174,7 +174,7 @@ namespace Python.Runtime
         /// </summary>
         private void StoreAttribute(string name, ManagedType ob)
         {
-            Runtime.PyDict_SetItemString(dict, name, ob.pyHandle);
+            Runtime.Interop.PyDict_SetItemString(dict, name, ob.pyHandle);
             cache[name] = ob;
         }
 
@@ -259,7 +259,7 @@ namespace Python.Runtime
                 return IntPtr.Zero;
             }
 
-            IntPtr op = Runtime.PyDict_GetItem(self.dict, key);
+            IntPtr op = Runtime.Interop.PyDict_GetItem(self.dict, key);
             if (op != IntPtr.Zero)
             {
                 Runtime.XIncref(op);
@@ -338,7 +338,7 @@ namespace Python.Runtime
             if (interactive_preload)
             {
                 interactive_preload = false;
-                if (Runtime.PySys_GetObject("ps1") != IntPtr.Zero)
+                if (Runtime.Interop.PySys_GetObject("ps1") != IntPtr.Zero)
                 {
                     preload = true;
                 }

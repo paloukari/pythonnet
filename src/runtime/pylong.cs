@@ -50,7 +50,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyLong(int value)
         {
-            obj = Runtime.PyLong_FromLong(value);
+            obj = Runtime.Interop.PyLong_FromLong(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -64,7 +64,7 @@ namespace Python.Runtime
         [CLSCompliant(false)]
         public PyLong(uint value)
         {
-            obj = Runtime.PyLong_FromLong(value);
+            obj = Runtime.Interop.PyLong_FromLong(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -77,7 +77,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyLong(long value)
         {
-            obj = Runtime.PyLong_FromLongLong(value);
+            obj = Runtime.Interop.PyLong_FromLongLong(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -91,7 +91,7 @@ namespace Python.Runtime
         [CLSCompliant(false)]
         public PyLong(ulong value)
         {
-            obj = Runtime.PyLong_FromUnsignedLongLong(value);
+            obj = Runtime.Interop.PyLong_FromUnsignedLongLong(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -104,7 +104,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyLong(short value)
         {
-            obj = Runtime.PyLong_FromLong(value);
+            obj = Runtime.Interop.PyLong_FromLong(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -118,7 +118,7 @@ namespace Python.Runtime
         [CLSCompliant(false)]
         public PyLong(ushort value)
         {
-            obj = Runtime.PyLong_FromLong(value);
+            obj = Runtime.Interop.PyLong_FromLong(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -131,7 +131,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyLong(byte value)
         {
-            obj = Runtime.PyLong_FromLong(value);
+            obj = Runtime.Interop.PyLong_FromLong(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -145,7 +145,7 @@ namespace Python.Runtime
         [CLSCompliant(false)]
         public PyLong(sbyte value)
         {
-            obj = Runtime.PyLong_FromLong(value);
+            obj = Runtime.Interop.PyLong_FromLong(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -158,7 +158,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyLong(double value)
         {
-            obj = Runtime.PyLong_FromDouble(value);
+            obj = Runtime.Interop.PyLong_FromDouble(value);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -171,7 +171,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyLong(string value)
         {
-            obj = Runtime.PyLong_FromString(value, IntPtr.Zero, 0);
+            obj = Runtime.Interop.PyLong_FromString(value, IntPtr.Zero, 0);
             Runtime.CheckExceptionOccurred();
         }
 
@@ -198,7 +198,7 @@ namespace Python.Runtime
         /// </remarks>
         public static PyLong AsLong(PyObject value)
         {
-            IntPtr op = Runtime.PyNumber_Long(value.obj);
+            IntPtr op = Runtime.Interop.PyNumber_Long(value.obj);
             Runtime.CheckExceptionOccurred();
             return new PyLong(op);
         }
@@ -235,7 +235,7 @@ namespace Python.Runtime
         /// </remarks>
         public long ToInt64()
         {
-            return Runtime.PyLong_AsLongLong(obj);
+            return Runtime.Interop.PyLong_AsLongLong(obj);
         }
     }
 }

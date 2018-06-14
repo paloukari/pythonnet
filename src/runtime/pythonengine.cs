@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -60,14 +60,14 @@ namespace Python.Runtime
         {
             get
             {
-                IntPtr p = Runtime.Py_GetProgramName();
+                IntPtr p = Runtime.Interop.Py_GetProgramName();
                 return UcsMarshaler.PtrToPy3UnicodePy2String(p) ?? "";
             }
             set
             {
                 Marshal.FreeHGlobal(_programName);
                 _programName = UcsMarshaler.Py3UnicodePy2StringtoPtr(value);
-                Runtime.Py_SetProgramName(_programName);
+                Runtime.Interop.Py_SetProgramName(_programName);
             }
         }
 
@@ -75,14 +75,14 @@ namespace Python.Runtime
         {
             get
             {
-                IntPtr p = Runtime.Py_GetPythonHome();
+                IntPtr p = Runtime.Interop.Py_GetPythonHome();
                 return UcsMarshaler.PtrToPy3UnicodePy2String(p) ?? "";
             }
             set
             {
                 Marshal.FreeHGlobal(_pythonHome);
                 _pythonHome = UcsMarshaler.Py3UnicodePy2StringtoPtr(value);
-                Runtime.Py_SetPythonHome(_pythonHome);
+                Runtime.Interop.Py_SetPythonHome(_pythonHome);
             }
         }
 
@@ -90,7 +90,7 @@ namespace Python.Runtime
         {
             get
             {
-                IntPtr p = Runtime.Py_GetPath();
+                IntPtr p = Runtime.Interop.Py_GetPath();
                 return UcsMarshaler.PtrToPy3UnicodePy2String(p) ?? "";
             }
             set
@@ -101,38 +101,38 @@ namespace Python.Runtime
                 }
                 Marshal.FreeHGlobal(_pythonPath);
                 _pythonPath = UcsMarshaler.Py3UnicodePy2StringtoPtr(value);
-                Runtime.Py_SetPath(_pythonPath);
+                Runtime.Interop.Py_SetPath(_pythonPath);
             }
         }
 
         public static string Version
         {
-            get { return Marshal.PtrToStringAnsi(Runtime.Py_GetVersion()); }
+            get { return Marshal.PtrToStringAnsi(Runtime.Interop.Py_GetVersion()); }
         }
 
         public static string BuildInfo
         {
-            get { return Marshal.PtrToStringAnsi(Runtime.Py_GetBuildInfo()); }
+            get { return Marshal.PtrToStringAnsi(Runtime.Interop.Py_GetBuildInfo()); }
         }
 
         public static string Platform
         {
-            get { return Marshal.PtrToStringAnsi(Runtime.Py_GetPlatform()); }
+            get { return Marshal.PtrToStringAnsi(Runtime.Interop.Py_GetPlatform()); }
         }
 
         public static string Copyright
         {
-            get { return Marshal.PtrToStringAnsi(Runtime.Py_GetCopyright()); }
+            get { return Marshal.PtrToStringAnsi(Runtime.Interop.Py_GetCopyright()); }
         }
 
         public static string Compiler
         {
-            get { return Marshal.PtrToStringAnsi(Runtime.Py_GetCompiler()); }
+            get { return Marshal.PtrToStringAnsi(Runtime.Interop.Py_GetCompiler()); }
         }
 
         public static int RunSimpleString(string code)
         {
-            return Runtime.PyRun_SimpleString(code);
+            return Runtime.Interop.PyRun_SimpleString(code);
         }
 
         public static void Initialize()
@@ -183,15 +183,15 @@ namespace Python.Runtime
 
                 // Load the clr.py resource into the clr module
                 IntPtr clr = Python.Runtime.ImportHook.GetCLRModule();
-                IntPtr clr_dict = Runtime.PyModule_GetDict(clr);
+                IntPtr clr_dict = Runtime.Interop.PyModule_GetDict(clr);
 
                 var locals = new PyDict();
                 try
                 {
-                    IntPtr module = Runtime.PyImport_AddModule("clr._extras");
-                    IntPtr module_globals = Runtime.PyModule_GetDict(module);
-                    IntPtr builtins = Runtime.PyEval_GetBuiltins();
-                    Runtime.PyDict_SetItemString(module_globals, "__builtins__", builtins);
+                    IntPtr module = Runtime.Interop.PyImport_AddModule("clr._extras");
+                    IntPtr module_globals = Runtime.Interop.PyModule_GetDict(module);
+                    IntPtr builtins = Runtime.Interop.PyEval_GetBuiltins();
+                    Runtime.Interop.PyDict_SetItemString(module_globals, "__builtins__", builtins);
 
                     Assembly assembly = Assembly.GetExecutingAssembly();
                     using (Stream stream = assembly.GetManifestResourceStream("clr.py"))
@@ -204,13 +204,13 @@ namespace Python.Runtime
 
                     // add the imported module to the clr module, and copy the API functions
                     // and decorators into the main clr module.
-                    Runtime.PyDict_SetItemString(clr_dict, "_extras", module);
+                    Runtime.Interop.PyDict_SetItemString(clr_dict, "_extras", module);
                     foreach (PyObject key in locals.Keys())
                     {
                         if (!key.ToString().StartsWith("_") || key.ToString().Equals("__version__"))
                         {
                             PyObject value = locals[key];
-                            Runtime.PyDict_SetItem(clr_dict, key.Handle, value.Handle);
+                            Runtime.Interop.PyDict_SetItem(clr_dict, key.Handle, value.Handle);
                             value.Dispose();
                         }
                         key.Dispose();
@@ -324,7 +324,7 @@ namespace Python.Runtime
         /// </remarks>
         public static IntPtr AcquireLock()
         {
-            return Runtime.PyGILState_Ensure();
+            return Runtime.Interop.PyGILState_Ensure();
         }
 
 
@@ -339,7 +339,7 @@ namespace Python.Runtime
         /// </remarks>
         public static void ReleaseLock(IntPtr gs)
         {
-            Runtime.PyGILState_Release(gs);
+            Runtime.Interop.PyGILState_Release(gs);
         }
 
 
@@ -355,7 +355,7 @@ namespace Python.Runtime
         /// </remarks>
         public static IntPtr BeginAllowThreads()
         {
-            return Runtime.PyEval_SaveThread();
+            return Runtime.Interop.PyEval_SaveThread();
         }
 
 
@@ -371,7 +371,7 @@ namespace Python.Runtime
         /// </remarks>
         public static void EndAllowThreads(IntPtr ts)
         {
-            Runtime.PyEval_RestoreThread(ts);
+            Runtime.Interop.PyEval_RestoreThread(ts);
         }
 
 
@@ -385,7 +385,7 @@ namespace Python.Runtime
         /// </remarks>
         public static PyObject ImportModule(string name)
         {
-            IntPtr op = Runtime.PyImport_ImportModule(name);
+            IntPtr op = Runtime.Interop.PyImport_ImportModule(name);
             Runtime.CheckExceptionOccurred();
             return new PyObject(op);
         }
@@ -400,7 +400,7 @@ namespace Python.Runtime
         /// </remarks>
         public static PyObject ReloadModule(PyObject module)
         {
-            IntPtr op = Runtime.PyImport_ReloadModule(module.Handle);
+            IntPtr op = Runtime.Interop.PyImport_ReloadModule(module.Handle);
             Runtime.CheckExceptionOccurred();
             return new PyObject(op);
         }
@@ -415,9 +415,9 @@ namespace Python.Runtime
         /// </remarks>
         public static PyObject ModuleFromString(string name, string code)
         {
-            IntPtr c = Runtime.Py_CompileString(code, "none", (IntPtr)257);
+            IntPtr c = Runtime.Interop.Py_CompileString(code, "none", (IntPtr)257);
             Runtime.CheckExceptionOccurred();
-            IntPtr m = Runtime.PyImport_ExecCodeModule(name, c);
+            IntPtr m = Runtime.Interop.PyImport_ExecCodeModule(name, c);
             Runtime.CheckExceptionOccurred();
             return new PyObject(m);
         }
@@ -425,7 +425,7 @@ namespace Python.Runtime
         public static PyObject Compile(string code, string filename = "", RunFlagType mode = RunFlagType.File)
         {
             var flag = (IntPtr)mode;
-            IntPtr ptr = Runtime.Py_CompileString(code, filename, flag);
+            IntPtr ptr = Runtime.Interop.Py_CompileString(code, filename, flag);
             Runtime.CheckExceptionOccurred();
             return new PyObject(ptr);
         }
@@ -485,13 +485,13 @@ namespace Python.Runtime
             var borrowedGlobals = true;
             if (globals == null)
             {
-                globals = Runtime.PyEval_GetGlobals();
+                globals = Runtime.Interop.PyEval_GetGlobals();
                 if (globals == IntPtr.Zero)
                 {
-                    globals = Runtime.PyDict_New();
-                    Runtime.PyDict_SetItemString(
+                    globals = Runtime.Interop.PyDict_New();
+                    Runtime.Interop.PyDict_SetItemString(
                         globals.Value, "__builtins__",
-                        Runtime.PyEval_GetBuiltins()
+                        Runtime.Interop.PyEval_GetBuiltins()
                     );
                     borrowedGlobals = false;
                 }
@@ -504,7 +504,7 @@ namespace Python.Runtime
 
             try
             {
-                IntPtr result = Runtime.PyRun_String(
+                IntPtr result = Runtime.Interop.PyRun_String(
                     code, (IntPtr)flag, globals.Value, locals.Value
                 );
 
@@ -596,7 +596,7 @@ namespace Python.Runtime
                 {
                     value = Converter.ToPython(kv[i + 1], kv[i + 1]?.GetType());
                 }
-                if (Runtime.PyDict_SetItemString(dict.Handle, (string)kv[i], value) != 0)
+                if (Runtime.Interop.PyDict_SetItemString(dict.Handle, (string)kv[i], value) != 0)
                 {
                     throw new ArgumentException(string.Format("Cannot add key '{0}' to dictionary.", (string)kv[i]));
                 }
@@ -642,7 +642,7 @@ namespace Python.Runtime
             using (GIL())
             {
                 string[] arr = argv.ToArray();
-                Runtime.PySys_SetArgvEx(arr.Length, arr, 0);
+                Runtime.Interop.PySys_SetArgvEx(arr.Length, arr, 0);
                 Runtime.CheckExceptionOccurred();
             }
         }

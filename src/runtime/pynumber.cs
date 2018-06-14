@@ -31,7 +31,7 @@ namespace Python.Runtime
         /// </remarks>
         public static bool IsNumberType(PyObject value)
         {
-            return Runtime.PyNumber_Check(value.obj);
+            return Runtime.Interop.PyNumber_Check(value.obj);
         }
     }
 }

@@ -57,19 +57,19 @@ namespace Python.Runtime
         /// </remarks>
         internal PyScope(IntPtr ptr, PyScopeManager manager)
         {
-            if (!Runtime.PyType_IsSubtype(Runtime.PyObject_TYPE(ptr), Runtime.PyModuleType))
+            if (!Runtime.Interop.PyType_IsSubtype(Runtime.PyObject_TYPE(ptr), Runtime.PyModuleType))
             {
                 throw new PyScopeException("object is not a module");
             }
             Manager = manager ?? PyScopeManager.Global;
             obj = ptr;
             //Refcount of the variables not increase
-            variables = Runtime.PyModule_GetDict(obj);
+            variables = Runtime.Interop.PyModule_GetDict(obj);
             Runtime.CheckExceptionOccurred();
 
-            Runtime.PyDict_SetItemString(
+            Runtime.Interop.PyDict_SetItemString(
                 variables, "__builtins__",
-                Runtime.PyEval_GetBuiltins()
+                Runtime.Interop.PyEval_GetBuiltins()
             );
             this.Name = this.Get<string>("__name__");
         }
@@ -182,7 +182,7 @@ namespace Python.Runtime
         /// </remarks>
         public void ImportAll(PyScope scope)
         {
-            int result = Runtime.PyDict_Update(variables, scope.variables);
+            int result = Runtime.Interop.PyDict_Update(variables, scope.variables);
             if (result < 0)
             {
                 throw new PythonException();
@@ -201,8 +201,8 @@ namespace Python.Runtime
             {
                 throw new PyScopeException("object is not a module");
             }
-            var module_dict = Runtime.PyModule_GetDict(module.obj);
-            int result = Runtime.PyDict_Update(variables, module_dict);
+            var module_dict = Runtime.Interop.PyModule_GetDict(module.obj);
+            int result = Runtime.Interop.PyDict_Update(variables, module_dict);
             if (result < 0)
             {
                 throw new PythonException();
@@ -217,7 +217,7 @@ namespace Python.Runtime
         /// </remarks>
         public void ImportAll(PyDict dict)
         {
-            int result = Runtime.PyDict_Update(variables, dict.obj);
+            int result = Runtime.Interop.PyDict_Update(variables, dict.obj);
             if (result < 0)
             {
                 throw new PythonException();
@@ -235,7 +235,7 @@ namespace Python.Runtime
         {
             Check();
             IntPtr _locals = locals == null ? variables : locals.obj;
-            IntPtr ptr = Runtime.PyEval_EvalCode(script.Handle, variables, _locals);
+            IntPtr ptr = Runtime.Interop.PyEval_EvalCode(script.Handle, variables, _locals);
             Runtime.CheckExceptionOccurred();
             if (ptr == Runtime.PyNone)
             {
@@ -277,7 +277,7 @@ namespace Python.Runtime
             Check();
             IntPtr _locals = locals == null ? variables : locals.obj;
             var flag = (IntPtr)Runtime.Py_eval_input;
-            IntPtr ptr = Runtime.PyRun_String(
+            IntPtr ptr = Runtime.Interop.PyRun_String(
                 code, flag, variables, _locals
             );
             Runtime.CheckExceptionOccurred();
@@ -315,7 +315,7 @@ namespace Python.Runtime
         private void Exec(string code, IntPtr _globals, IntPtr _locals)
         {
             var flag = (IntPtr)Runtime.Py_file_input;
-            IntPtr ptr = Runtime.PyRun_String(
+            IntPtr ptr = Runtime.Interop.PyRun_String(
                 code, flag, _globals, _locals
             );
             Runtime.CheckExceptionOccurred();
@@ -345,7 +345,7 @@ namespace Python.Runtime
             Check();
             using (var pyKey = new PyString(name))
             {
-                int r = Runtime.PyObject_SetItem(variables, pyKey.obj, value);
+                int r = Runtime.Interop.PyObject_SetItem(variables, pyKey.obj, value);
                 if (r < 0)
                 {
                     throw new PythonException();
@@ -364,7 +364,7 @@ namespace Python.Runtime
             Check();
             using (var pyKey = new PyString(name))
             {
-                int r = Runtime.PyObject_DelItem(variables, pyKey.obj);
+                int r = Runtime.Interop.PyObject_DelItem(variables, pyKey.obj);
                 if (r < 0)
                 {
                     throw new PythonException();
@@ -383,7 +383,7 @@ namespace Python.Runtime
             Check();
             using (var pyKey = new PyString(name))
             {
-                return Runtime.PyMapping_HasKey(variables, pyKey.obj) != 0;
+                return Runtime.Interop.PyMapping_HasKey(variables, pyKey.obj) != 0;
             }
         }
 
@@ -417,9 +417,9 @@ namespace Python.Runtime
             Check();
             using (var pyKey = new PyString(name))
             {
-                if (Runtime.PyMapping_HasKey(variables, pyKey.obj) != 0)
+                if (Runtime.Interop.PyMapping_HasKey(variables, pyKey.obj) != 0)
                 {
-                    IntPtr op = Runtime.PyObject_GetItem(variables, pyKey.obj);
+                    IntPtr op = Runtime.Interop.PyObject_GetItem(variables, pyKey.obj);
                     if (op == IntPtr.Zero)
                     {
                         throw new PythonException();
@@ -547,7 +547,7 @@ namespace Python.Runtime
             {
                 name = "";
             }
-            var module = Runtime.PyModule_New(name);
+            var module = Runtime.Interop.PyModule_New(name);
             if (module == IntPtr.Zero)
             {
                 throw new PythonException();

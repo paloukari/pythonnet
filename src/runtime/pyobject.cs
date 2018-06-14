@@ -138,7 +138,7 @@ namespace Python.Runtime
         {
             if (!disposed)
             {
-                if (Runtime.Py_IsInitialized() > 0 && !Runtime.IsFinalizing)
+                if (Runtime.Interop.Py_IsInitialized() > 0 && !Runtime.IsFinalizing)
                 {
                     IntPtr gs = PythonEngine.AcquireLock();
                     Runtime.XDecref(obj);
@@ -191,7 +191,7 @@ namespace Python.Runtime
         /// </remarks>
         public bool HasAttr(string name)
         {
-            return Runtime.PyObject_HasAttrString(obj, name) != 0;
+            return Runtime.Interop.PyObject_HasAttrString(obj, name) != 0;
         }
 
 
@@ -204,7 +204,7 @@ namespace Python.Runtime
         /// </remarks>
         public bool HasAttr(PyObject name)
         {
-            return Runtime.PyObject_HasAttr(obj, name.obj) != 0;
+            return Runtime.Interop.PyObject_HasAttr(obj, name.obj) != 0;
         }
 
 
@@ -217,7 +217,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyObject GetAttr(string name)
         {
-            IntPtr op = Runtime.PyObject_GetAttrString(obj, name);
+            IntPtr op = Runtime.Interop.PyObject_GetAttrString(obj, name);
             if (op == IntPtr.Zero)
             {
                 throw new PythonException();
@@ -235,10 +235,10 @@ namespace Python.Runtime
         /// </remarks>
         public PyObject GetAttr(string name, PyObject _default)
         {
-            IntPtr op = Runtime.PyObject_GetAttrString(obj, name);
+            IntPtr op = Runtime.Interop.PyObject_GetAttrString(obj, name);
             if (op == IntPtr.Zero)
             {
-                Runtime.PyErr_Clear();
+                Runtime.Interop.PyErr_Clear();
                 return _default;
             }
             return new PyObject(op);
@@ -255,7 +255,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyObject GetAttr(PyObject name)
         {
-            IntPtr op = Runtime.PyObject_GetAttr(obj, name.obj);
+            IntPtr op = Runtime.Interop.PyObject_GetAttr(obj, name.obj);
             if (op == IntPtr.Zero)
             {
                 throw new PythonException();
@@ -274,10 +274,10 @@ namespace Python.Runtime
         /// </remarks>
         public PyObject GetAttr(PyObject name, PyObject _default)
         {
-            IntPtr op = Runtime.PyObject_GetAttr(obj, name.obj);
+            IntPtr op = Runtime.Interop.PyObject_GetAttr(obj, name.obj);
             if (op == IntPtr.Zero)
             {
-                Runtime.PyErr_Clear();
+                Runtime.Interop.PyErr_Clear();
                 return _default;
             }
             return new PyObject(op);
@@ -293,7 +293,7 @@ namespace Python.Runtime
         /// </remarks>
         public void SetAttr(string name, PyObject value)
         {
-            int r = Runtime.PyObject_SetAttrString(obj, name, value.obj);
+            int r = Runtime.Interop.PyObject_SetAttrString(obj, name, value.obj);
             if (r < 0)
             {
                 throw new PythonException();
@@ -311,7 +311,7 @@ namespace Python.Runtime
         /// </remarks>
         public void SetAttr(PyObject name, PyObject value)
         {
-            int r = Runtime.PyObject_SetAttr(obj, name.obj, value.obj);
+            int r = Runtime.Interop.PyObject_SetAttr(obj, name.obj, value.obj);
             if (r < 0)
             {
                 throw new PythonException();
@@ -328,7 +328,7 @@ namespace Python.Runtime
         /// </remarks>
         public void DelAttr(string name)
         {
-            int r = Runtime.PyObject_SetAttrString(obj, name, IntPtr.Zero);
+            int r = Runtime.Interop.PyObject_SetAttrString(obj, name, IntPtr.Zero);
             if (r < 0)
             {
                 throw new PythonException();
@@ -346,7 +346,7 @@ namespace Python.Runtime
         /// </remarks>
         public void DelAttr(PyObject name)
         {
-            int r = Runtime.PyObject_SetAttr(obj, name.obj, IntPtr.Zero);
+            int r = Runtime.Interop.PyObject_SetAttr(obj, name.obj, IntPtr.Zero);
             if (r < 0)
             {
                 throw new PythonException();
@@ -364,7 +364,7 @@ namespace Python.Runtime
         /// </remarks>
         public virtual PyObject GetItem(PyObject key)
         {
-            IntPtr op = Runtime.PyObject_GetItem(obj, key.obj);
+            IntPtr op = Runtime.Interop.PyObject_GetItem(obj, key.obj);
             if (op == IntPtr.Zero)
             {
                 throw new PythonException();
@@ -417,7 +417,7 @@ namespace Python.Runtime
         /// </remarks>
         public virtual void SetItem(PyObject key, PyObject value)
         {
-            int r = Runtime.PyObject_SetItem(obj, key.obj, value.obj);
+            int r = Runtime.Interop.PyObject_SetItem(obj, key.obj, value.obj);
             if (r < 0)
             {
                 throw new PythonException();
@@ -469,7 +469,7 @@ namespace Python.Runtime
         /// </remarks>
         public virtual void DelItem(PyObject key)
         {
-            int r = Runtime.PyObject_DelItem(obj, key.obj);
+            int r = Runtime.Interop.PyObject_DelItem(obj, key.obj);
             if (r < 0)
             {
                 throw new PythonException();
@@ -520,10 +520,10 @@ namespace Python.Runtime
         /// </remarks>
         public virtual int Length()
         {
-            int s = Runtime.PyObject_Size(obj);
+            int s = Runtime.Interop.PyObject_Size(obj);
             if (s < 0)
             {
-                Runtime.PyErr_Clear();
+                Runtime.Interop.PyErr_Clear();
                 return 0;
             }
             return s;
@@ -582,7 +582,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyObject GetIterator()
         {
-            IntPtr r = Runtime.PyObject_GetIter(obj);
+            IntPtr r = Runtime.Interop.PyObject_GetIter(obj);
             if (r == IntPtr.Zero)
             {
                 throw new PythonException();
@@ -614,7 +614,7 @@ namespace Python.Runtime
         public PyObject Invoke(params PyObject[] args)
         {
             var t = new PyTuple(args);
-            IntPtr r = Runtime.PyObject_Call(obj, t.obj, IntPtr.Zero);
+            IntPtr r = Runtime.Interop.PyObject_Call(obj, t.obj, IntPtr.Zero);
             t.Dispose();
             if (r == IntPtr.Zero)
             {
@@ -633,7 +633,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyObject Invoke(PyTuple args)
         {
-            IntPtr r = Runtime.PyObject_Call(obj, args.obj, IntPtr.Zero);
+            IntPtr r = Runtime.Interop.PyObject_Call(obj, args.obj, IntPtr.Zero);
             if (r == IntPtr.Zero)
             {
                 throw new PythonException();
@@ -652,7 +652,7 @@ namespace Python.Runtime
         public PyObject Invoke(PyObject[] args, PyDict kw)
         {
             var t = new PyTuple(args);
-            IntPtr r = Runtime.PyObject_Call(obj, t.obj, kw != null ? kw.obj : IntPtr.Zero);
+            IntPtr r = Runtime.Interop.PyObject_Call(obj, t.obj, kw != null ? kw.obj : IntPtr.Zero);
             t.Dispose();
             if (r == IntPtr.Zero)
             {
@@ -671,7 +671,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyObject Invoke(PyTuple args, PyDict kw)
         {
-            IntPtr r = Runtime.PyObject_Call(obj, args.obj, kw != null ? kw.obj : IntPtr.Zero);
+            IntPtr r = Runtime.Interop.PyObject_Call(obj, args.obj, kw != null ? kw.obj : IntPtr.Zero);
             if (r == IntPtr.Zero)
             {
                 throw new PythonException();
@@ -755,10 +755,10 @@ namespace Python.Runtime
         /// </remarks>
         public bool IsInstance(PyObject typeOrClass)
         {
-            int r = Runtime.PyObject_IsInstance(obj, typeOrClass.obj);
+            int r = Runtime.Interop.PyObject_IsInstance(obj, typeOrClass.obj);
             if (r < 0)
             {
-                Runtime.PyErr_Clear();
+                Runtime.Interop.PyErr_Clear();
                 return false;
             }
             return r != 0;
@@ -774,10 +774,10 @@ namespace Python.Runtime
         /// </remarks>
         public bool IsSubclass(PyObject typeOrClass)
         {
-            int r = Runtime.PyObject_IsSubclass(obj, typeOrClass.obj);
+            int r = Runtime.Interop.PyObject_IsSubclass(obj, typeOrClass.obj);
             if (r < 0)
             {
-                Runtime.PyErr_Clear();
+                Runtime.Interop.PyErr_Clear();
                 return false;
             }
             return r != 0;
@@ -793,7 +793,7 @@ namespace Python.Runtime
         /// </remarks>
         public bool IsCallable()
         {
-            return Runtime.PyCallable_Check(obj) != 0;
+            return Runtime.Interop.PyCallable_Check(obj) != 0;
         }
 
 
@@ -819,7 +819,7 @@ namespace Python.Runtime
         /// </remarks>
         public bool IsTrue()
         {
-            return Runtime.PyObject_IsTrue(obj) != 0;
+            return Runtime.Interop.PyObject_IsTrue(obj) != 0;
         }
 
 
@@ -832,7 +832,7 @@ namespace Python.Runtime
         /// </remarks>
         public PyList Dir()
         {
-            IntPtr r = Runtime.PyObject_Dir(obj);
+            IntPtr r = Runtime.Interop.PyObject_Dir(obj);
             if (r == IntPtr.Zero)
             {
                 throw new PythonException();
@@ -850,7 +850,7 @@ namespace Python.Runtime
         /// </remarks>
         public string Repr()
         {
-            IntPtr strval = Runtime.PyObject_Repr(obj);
+            IntPtr strval = Runtime.Interop.PyObject_Repr(obj);
             string result = Runtime.GetManagedString(strval);
             Runtime.XDecref(strval);
             return result;
@@ -866,7 +866,7 @@ namespace Python.Runtime
         /// </remarks>
         public override string ToString()
         {
-            IntPtr strval = Runtime.PyObject_Unicode(obj);
+            IntPtr strval = Runtime.Interop.PyObject_Unicode(obj);
             string result = Runtime.GetManagedString(strval);
             Runtime.XDecref(strval);
             return result;
@@ -909,7 +909,7 @@ namespace Python.Runtime
         /// </remarks>
         public override int GetHashCode()
         {
-            return ((ulong)Runtime.PyObject_Hash(obj)).GetHashCode();
+            return ((ulong)Runtime.Interop.PyObject_Hash(obj)).GetHashCode();
         }
 
 
@@ -931,7 +931,7 @@ namespace Python.Runtime
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
             IntPtr ptr = Converter.ToPython(value, value?.GetType());
-            int r = Runtime.PyObject_SetAttrString(obj, binder.Name, ptr);
+            int r = Runtime.Interop.PyObject_SetAttrString(obj, binder.Name, ptr);
             if (r < 0)
             {
                 throw new PythonException();
@@ -952,7 +952,7 @@ namespace Python.Runtime
             var namedArgumentCount = callInfo.ArgumentNames.Count;
             var regularArgumentCount = callInfo.ArgumentCount - namedArgumentCount;
 
-            var argTuple = Runtime.PyTuple_New(regularArgumentCount);
+            var argTuple = Runtime.Interop.PyTuple_New(regularArgumentCount);
             for (int i = 0; i < regularArgumentCount; ++i)
             {
                 AddArgument(argTuple, i, inargs[i]);
@@ -975,7 +975,7 @@ namespace Python.Runtime
             {
                 ;
             }
-            IntPtr argtuple = Runtime.PyTuple_New(arg_count);
+            IntPtr argtuple = Runtime.Interop.PyTuple_New(arg_count);
             for (var i = 0; i < arg_count; i++)
             {
                 AddArgument(argtuple, i, inargs[i]);
@@ -1004,7 +1004,7 @@ namespace Python.Runtime
         {
             IntPtr ptr = GetPythonObject(target);
 
-            if (Runtime.PyTuple_SetItem(argtuple, i, ptr) < 0)
+            if (Runtime.Interop.PyTuple_SetItem(argtuple, i, ptr) < 0)
             {
                 throw new PythonException();
             }
@@ -1102,40 +1102,40 @@ namespace Python.Runtime
             switch (binder.Operation)
             {
                 case ExpressionType.Add:
-                    res = Runtime.PyNumber_Add(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Add(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.AddAssign:
-                    res = Runtime.PyNumber_InPlaceAdd(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceAdd(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.Subtract:
-                    res = Runtime.PyNumber_Subtract(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Subtract(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.SubtractAssign:
-                    res = Runtime.PyNumber_InPlaceSubtract(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceSubtract(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.Multiply:
-                    res = Runtime.PyNumber_Multiply(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Multiply(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.MultiplyAssign:
-                    res = Runtime.PyNumber_InPlaceMultiply(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceMultiply(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.Divide:
-                    res = Runtime.PyNumber_Divide(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Divide(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.DivideAssign:
-                    res = Runtime.PyNumber_InPlaceDivide(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceDivide(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.And:
-                    res = Runtime.PyNumber_And(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_And(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.AndAssign:
-                    res = Runtime.PyNumber_InPlaceAnd(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceAnd(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.ExclusiveOr:
-                    res = Runtime.PyNumber_Xor(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Xor(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.ExclusiveOrAssign:
-                    res = Runtime.PyNumber_InPlaceXor(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceXor(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.GreaterThan:
                     result = Runtime.PyObject_Compare(this.obj, ((PyObject)arg).obj) > 0;
@@ -1144,10 +1144,10 @@ namespace Python.Runtime
                     result = Runtime.PyObject_Compare(this.obj, ((PyObject)arg).obj) >= 0;
                     return true;
                 case ExpressionType.LeftShift:
-                    res = Runtime.PyNumber_Lshift(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Lshift(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.LeftShiftAssign:
-                    res = Runtime.PyNumber_InPlaceLshift(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceLshift(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.LessThan:
                     result = Runtime.PyObject_Compare(this.obj, ((PyObject)arg).obj) < 0;
@@ -1156,28 +1156,28 @@ namespace Python.Runtime
                     result = Runtime.PyObject_Compare(this.obj, ((PyObject)arg).obj) <= 0;
                     return true;
                 case ExpressionType.Modulo:
-                    res = Runtime.PyNumber_Remainder(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Remainder(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.ModuloAssign:
-                    res = Runtime.PyNumber_InPlaceRemainder(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceRemainder(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.NotEqual:
                     result = Runtime.PyObject_Compare(this.obj, ((PyObject)arg).obj) != 0;
                     return true;
                 case ExpressionType.Or:
-                    res = Runtime.PyNumber_Or(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Or(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.OrAssign:
-                    res = Runtime.PyNumber_InPlaceOr(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceOr(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.Power:
-                    res = Runtime.PyNumber_Power(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Power(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.RightShift:
-                    res = Runtime.PyNumber_Rshift(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_Rshift(this.obj, ((PyObject)arg).obj);
                     break;
                 case ExpressionType.RightShiftAssign:
-                    res = Runtime.PyNumber_InPlaceRshift(this.obj, ((PyObject)arg).obj);
+                    res = Runtime.Interop.PyNumber_InPlaceRshift(this.obj, ((PyObject)arg).obj);
                     break;
                 default:
                     result = null;
@@ -1209,24 +1209,24 @@ namespace Python.Runtime
             switch (binder.Operation)
             {
                 case ExpressionType.Negate:
-                    res = Runtime.PyNumber_Negative(this.obj);
+                    res = Runtime.Interop.PyNumber_Negative(this.obj);
                     break;
                 case ExpressionType.UnaryPlus:
-                    res = Runtime.PyNumber_Positive(this.obj);
+                    res = Runtime.Interop.PyNumber_Positive(this.obj);
                     break;
                 case ExpressionType.OnesComplement:
-                    res = Runtime.PyNumber_Invert(this.obj);
+                    res = Runtime.Interop.PyNumber_Invert(this.obj);
                     break;
                 case ExpressionType.Not:
-                    r = Runtime.PyObject_Not(this.obj);
+                    r = Runtime.Interop.PyObject_Not(this.obj);
                     result = r == 1;
                     return r != -1;
                 case ExpressionType.IsFalse:
-                    r = Runtime.PyObject_IsTrue(this.obj);
+                    r = Runtime.Interop.PyObject_IsTrue(this.obj);
                     result = r == 0;
                     return r != -1;
                 case ExpressionType.IsTrue:
-                    r = Runtime.PyObject_IsTrue(this.obj);
+                    r = Runtime.Interop.PyObject_IsTrue(this.obj);
                     result = r == 1;
                     return r != -1;
                 case ExpressionType.Decrement:

@@ -19,7 +19,7 @@ namespace Python.Runtime
         public PythonException()
         {
             IntPtr gs = PythonEngine.AcquireLock();
-            Runtime.PyErr_Fetch(ref _pyType, ref _pyValue, ref _pyTB);
+            Runtime.Interop.PyErr_Fetch(ref _pyType, ref _pyValue, ref _pyTB);
             Runtime.XIncref(_pyType);
             Runtime.XIncref(_pyValue);
             Runtime.XIncref(_pyTB);
@@ -73,7 +73,7 @@ namespace Python.Runtime
         public void Restore()
         {
             IntPtr gs = PythonEngine.AcquireLock();
-            Runtime.PyErr_Restore(_pyType, _pyValue, _pyTB);
+            Runtime.Interop.PyErr_Restore(_pyType, _pyValue, _pyTB);
             _pyType = IntPtr.Zero;
             _pyValue = IntPtr.Zero;
             _pyTB = IntPtr.Zero;
@@ -156,7 +156,7 @@ namespace Python.Runtime
         {
             if (!disposed)
             {
-                if (Runtime.Py_IsInitialized() > 0 && !Runtime.IsFinalizing)
+                if (Runtime.Interop.Py_IsInitialized() > 0 && !Runtime.IsFinalizing)
                 {
                     IntPtr gs = PythonEngine.AcquireLock();
                     Runtime.XDecref(_pyType);
@@ -182,7 +182,7 @@ namespace Python.Runtime
         /// </remarks>
         public static bool Matches(IntPtr ob)
         {
-            return Runtime.PyErr_ExceptionMatches(ob) != 0;
+            return Runtime.Interop.PyErr_ExceptionMatches(ob) != 0;
         }
     }
 }

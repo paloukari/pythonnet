@@ -88,7 +88,7 @@ namespace Python.Runtime
                     Runtime.XIncref(om.pyHandle);
                     return om.pyHandle;
                 default:
-                    return Runtime.PyObject_GenericGetAttr(ob, key);
+                    return Runtime.Interop.PyObject_GenericGetAttr(ob, key);
             }
         }
 
@@ -106,7 +106,7 @@ namespace Python.Runtime
             {
                 if (self.info.IsGenericMethod)
                 {
-                    int len = Runtime.PyTuple_Size(args); //FIXME: Never used
+                    int len = Runtime.Interop.PyTuple_Size(args); //FIXME: Never used
                     Type[] sigTp = Runtime.PythonArgsToTypeArray(args, true);
                     if (sigTp != null)
                     {
@@ -131,17 +131,17 @@ namespace Python.Runtime
 
                 if (target == IntPtr.Zero && !self.m.IsStatic())
                 {
-                    int len = Runtime.PyTuple_Size(args);
+                    int len = Runtime.Interop.PyTuple_Size(args);
                     if (len < 1)
                     {
                         Exceptions.SetError(Exceptions.TypeError, "not enough arguments");
                         return IntPtr.Zero;
                     }
-                    target = Runtime.PyTuple_GetItem(args, 0);
+                    target = Runtime.Interop.PyTuple_GetItem(args, 0);
                     Runtime.XIncref(target);
                     disposeList.Add(target);
 
-                    args = Runtime.PyTuple_GetSlice(args, 1, len);
+                    args = Runtime.Interop.PyTuple_GetSlice(args, 1, len);
                     disposeList.Add(args);
                 }
 
@@ -158,7 +158,7 @@ namespace Python.Runtime
                         if (baseType != null)
                         {
                             string baseMethodName = "_" + baseType.type.Name + "__" + self.m.name;
-                            IntPtr baseMethod = Runtime.PyObject_GetAttrString(target, baseMethodName);
+                            IntPtr baseMethod = Runtime.Interop.PyObject_GetAttrString(target, baseMethodName);
                             if (baseMethod != IntPtr.Zero)
                             {
                                 var baseSelf = GetManagedObject(baseMethod) as MethodBinding;
@@ -170,7 +170,7 @@ namespace Python.Runtime
                             }
                             else
                             {
-                                Runtime.PyErr_Clear();
+                                Runtime.Interop.PyErr_Clear();
                             }
                         }
                     }
@@ -199,14 +199,14 @@ namespace Python.Runtime
 
             if (self.target != IntPtr.Zero)
             {
-                x = Runtime.PyObject_Hash(self.target).ToInt64();
+                x = Runtime.Interop.PyObject_Hash(self.target).ToInt64();
                 if (x == -1)
                 {
                     return new IntPtr(-1);
                 }
             }
 
-            y = Runtime.PyObject_Hash(self.m.pyHandle).ToInt64();
+            y = Runtime.Interop.PyObject_Hash(self.m.pyHandle).ToInt64();
             if (y == -1)
             {
                 return new IntPtr(-1);
